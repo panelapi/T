@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>网络状态检测中心</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<style>
+  /* 页面整体样式 */
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Open Sans', sans-serif;
+    background-color: #f8f8f7;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  /* 容器样式 */
+  .container {
+    text-align: center;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    background-color: #fff;
+    width: 100%;
+    max-width: 600px;
+    transition: all 0.3s ease-in-out;
+  }
+
+  /* 信息块样式 */
+  .info-block {
+    margin-bottom: 15px;
+  }
+
+  .info-title {
+    font-size: 18px; /* 调整标题字体大小以适应小屏幕 */
+    color: #1d1d1f;
+    margin-bottom: 8px;
+  }
+
+  .info-content, .alert-message {
+    font-size: 14px; /* 调整内容字体大小以适应小屏幕 */
+    color: #6e6e73;
+    margin-top: 5px;
+  }
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .protected, .unprotected {
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+
+  .protected {
+    color: #fff;
+    background-color: #4CAF50; /* 绿色 */
+  }
+
+  .unprotected {
+    color: #fff;
+    background-color: #f44336; /* 红色 */
+  }
+
+  .icon {
+    margin-right: 5px;
+  }
+
+  /* 加载中动画样式 */
+  .loading-animation {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    border-top-color: #333;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 600px) {
+    .info-block {
+      margin-bottom: 10px; /* 在小屏幕上减少间距 */
+    }
+    .info-title, .info-content, .alert-message {
+      font-size: 15px; /* 对小屏幕进一步进行字体大小调整 */
+    }
+    .container {
+      padding: 15px; /* 在小屏幕上减少填充 */
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="info-block" id="ip_block">
+    <div class="info-title">您的 IP 地址:</div>
+    <div class="info-content" id="ip_info"><span class="loading-animation"></span></div>
+  </div>
+  <div class="info-block" id="status_block">
+    <div class="info-title">您当前的状态:</div>
+    <div id="status_info" class="status-indicator">
+      <i class="icon fas fa-lock"></i><span class="loading-animation"></span>
+    </div>
+    <div id="alert_message" class="alert-message"><span class="loading-animation"></span></div>
+  </div>
+  <div class="info-block">
+    <div class="info-title">提供商:</div>
+    <div class="info-content" id="provider_info"><span class="loading-animation"></span></div>
+  </div>
+  <div class="info-block">
+    <div class="info-title">地区:</div>
+    <div class="info-content" id="country_info"><span class="loading-animation"></span></div>
+  </div>
+  <div class="info-block">
+    <div class="info-title">浏览器:</div>
+    <div class="info-content" id="browser_info"><span class="loading-animation"></span></div>
+  </div>
+  <div class="info-block">
+    <div class="info-title">时区:</div>
+    <div class="info-content" id="timezone_info"><span class="loading-animation"></span></div>
+  </div>
+  <div class="info-block">
+    <div class="info-title">语言:</div>
+    <div class="info-content" id="language_info"><span class="loading-animation"></span></div>
+  </div>
+</div>
+
+<script>
+const specialIPs = ['205.234.232.164', '103.135.102.92', '91.229.132.52', '185.248.184.82', '129.150.52.215', '64.29.68.29', '194.147.16.4', '152.70.246.254', '12.198.49.28', '216.156.128.52', '27.109.160.174', '175.143.93.222'];
+const container = document.getElementById('container');
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const language = navigator.language;
+
+fetch('https://api.ip.sb/geoip')
+  .then(response => response.json())
+  .then(data => {
+    const ipAddress = data.ip;
+    const status = specialIPs.includes(ipAddress);
+    const statusElement = document.getElementById('status_info');
+    const alertElement = document.getElementById('alert_message');
+    if (status) {
+      statusElement.innerHTML = '<i class="icon fas fa-lock"></i><span>已受保护</span>';
+      statusElement.className = 'status-indicator protected';
+      alertElement.textContent = '您当前已接入Forest Network提供的高速安全网络。使用 Forest VPN，您可以尽情浏览如旁若无人。我们不会跟踪您在网上的行为（并已经过审查来证明这一点）。您的数据已加密并更改您的 IP 10次以上保护您的安全。';
+    } else {
+      statusElement.innerHTML = '<i class="icon fas fa-exclamation-triangle"></i><span>未受保护</span>';
+      statusElement.className = 'status-indicator unprotected';
+      alertElement.textContent = '当前未接入Forest Network，可能导致您的数据被追踪。';
+    }
+    document.getElementById('ip_info').textContent = ipAddress;
+    document.getElementById('provider_info').innerHTML = status ? '<span class="protected">Forest Network</span>' : '<span class="unprotected">' + (data.isp || '加载中...') + '</span>';
+    document.getElementById('country_info').textContent = data.country || '加载中...';
+    document.getElementById('browser_info').textContent = navigator.userAgent.split(' ')[0];
+    document.getElementById('timezone_info').textContent = timezone;
+    document.getElementById('language_info').textContent = language;
+  })
+  .catch(error => console.error('获取 IP 数据失败:', error));
+</script>
+
+</body>
+</html>
