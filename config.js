@@ -1,6 +1,6 @@
 // 配置对象，包含应用程序或服务的相关信息
 window.EnvConfig = {
-    serverUrl: 'https://gov.seeworld.cc',
+    serverUrl: 'https://www.forestnet.cc',
     appName: 'SeeWorld', // 应用程序名称
     appLogo: './favicon.svg', // 应用程序图标 (空)
     
